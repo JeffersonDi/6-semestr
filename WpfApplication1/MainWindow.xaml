@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApplication1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="1000" WindowStartupLocation="CenterScreen">
+        Title="MainWindow" Height="610" Width="1000" WindowStartupLocation="CenterScreen">
     <Grid>
         <!--<Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -49,7 +49,7 @@
             </Grid>
         </StackPanel>
 
-        <StackPanel x:Name="SPRanged" Background="Red" Visibility="Visible" Margin="0,40,0,0">
+        <StackPanel x:Name="SPRanged" Background="Red" Visibility="Hidden" Margin="0,40,0,0">
             <Grid Height="336">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -97,7 +97,7 @@
             </Grid>
         </StackPanel>
 
-        <StackPanel x:Name="SPRD" Background="#FFC9C9C9" Visibility="Hidden" Margin="0,40,0,0">
+        <StackPanel x:Name="SPRD" Background="#FFC9C9C9" Visibility="Visible" Margin="0,40,0,0">
             <Grid Height="530">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -106,13 +106,39 @@
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
                     <RowDefinition Height="250*"/>
                     <RowDefinition Height="250*"/>
                     <RowDefinition Height="31"/>
                 </Grid.RowDefinitions>
+                
+
+                <StackPanel Background="White" VerticalAlignment="Top">
+                    <RadioButton Uid="1" x:Name="RB1" Content="Английский" IsChecked="True" Margin="0,0,239,0" Checked="RB1_Checked"/>
+                    <RadioButton Uid="2" x:Name="RB2" Content="Русский" Margin="0,0,248,0" Checked="RB1_Checked"/>
+                </StackPanel>
+
+                <StackPanel Background="White" Grid.Row="1">
+                    <TextBlock Text="Исходный текст:" FontSize="18"/>
+                </StackPanel>
+                <StackPanel Background="White" Grid.Row="1" Grid.Column="1">
+                    <TextBlock Text="Текст 1:" FontSize="18"/>
+                </StackPanel>
+                <StackPanel Background="White" Grid.Row="1" Grid.Column="2">
+                    <TextBlock Text="Текст 2:" FontSize="18"/>
+                </StackPanel>
+                
+                <TextBox x:Name="textBoxCipf1" Grid.Column="0" Grid.Row="2" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Margin="0,0,0,0">
+                    <TextBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem x:Name="MI_ChooseFileTextCipf1" Header="Выбрать файл с текстом" Click="MI_ChooseFileTextCipf1_Click"/>
+                            <MenuItem x:Name="MI_ClearCipf1" Header="Очистить" Click="MI_ClearCipf1_Click"/>
+                        </ContextMenu>
+                    </TextBox.ContextMenu>
+                </TextBox>
                 <DataGrid x:Name="GridCipf1"
                     Grid.Column="0" 
-                    Grid.Row="2" 
+                    Grid.Row="3" 
                     AutoGenerateColumns="False" 
                     IsReadOnly="False" 
                     ItemsSource="{Binding}" VerticalScrollBarVisibility="Visible" Margin="0,-1,0,0">
@@ -136,43 +162,8 @@
                         </ContextMenu>
                     </DataGrid.ContextMenu>
                 </DataGrid>
-
-                <StackPanel Background="White" VerticalAlignment="Top">
-                    <RadioButton Uid="1" x:Name="RB1" Content="Английский" IsChecked="True" Margin="0,0,239,0" Checked="RB1_Checked"/>
-                    <RadioButton Uid="2" x:Name="RB2" Content="Русский" Margin="0,0,248,0" Checked="RB1_Checked"/>
-                </StackPanel>
                 
-                <TextBox x:Name="textBoxCipf1" Grid.Column="0" Grid.Row="1" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Margin="0,0,0,0">
-                    <TextBox.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem x:Name="MI_ChooseFileTextCipf1" Header="Выбрать файл с текстом" Click="MI_ChooseFileTextCipf1_Click"/>
-                            <MenuItem x:Name="MI_ClearCipf1" Header="Очистить" Click="MI_ClearCipf1_Click"/>
-                        </ContextMenu>
-                    </TextBox.ContextMenu>
-                </TextBox>
-                
-                <DataGrid x:Name="GridCipf2"
-                    Grid.Column="1" 
-                    Grid.Row="2" 
-                    AutoGenerateColumns="False" 
-                    IsReadOnly="False" 
-                    ItemsSource="{Binding}" VerticalScrollBarVisibility="Visible" Margin="0,-1,0,0">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Ранг (RD)" 
-                                Binding="{Binding RealDistribution}" 
-                                Width="60"/>
-                        <DataGridTextColumn Header="Слова" 
-                                Binding="{Binding Words}" 
-                                Width="100*"/>
-                        <DataGridTextColumn Header="(ZD)" 
-                                Binding="{Binding ZipfDistribution}" 
-                                Width="60"/>
-                        <DataGridTextColumn Header="(DevZ)" 
-                                Binding="{Binding DevZ}" 
-                                Width="60"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-                <TextBox x:Name="textBoxCipf2" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Margin="0,0,0,0">
+                <TextBox x:Name="textBoxCipf2" Grid.Column="1" Grid.Row="2" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Margin="0,0,0,0">
                     <TextBox.ContextMenu>
                         <ContextMenu>
                             <MenuItem x:Name="MI_ChooseFileTextCipf2" Header="Выбрать файл с текстом" Click="MI_ChooseFileTextCipf2_Click"/>
@@ -180,10 +171,9 @@
                         </ContextMenu>
                     </TextBox.ContextMenu>
                 </TextBox>
-                
-                <DataGrid x:Name="GridCipf3"
-                    Grid.Column="2"
-                    Grid.Row="2" 
+                <DataGrid x:Name="GridCipf2"
+                    Grid.Column="1" 
+                    Grid.Row="3" 
                     AutoGenerateColumns="False" 
                     IsReadOnly="False" 
                     ItemsSource="{Binding}" VerticalScrollBarVisibility="Visible" Margin="0,-1,0,0">
@@ -202,7 +192,8 @@
                                 Width="60"/>
                     </DataGrid.Columns>
                 </DataGrid>
-                <TextBox x:Name="textBoxCipf3" Grid.Column="2" Grid.Row="1" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Margin="0,0,0,0">
+                
+                <TextBox x:Name="textBoxCipf3" Grid.Column="2" Grid.Row="2" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Margin="0,0,0,0">
                     <TextBox.ContextMenu>
                         <ContextMenu>
                             <MenuItem x:Name="MI_ChooseFileTextCipf3" Header="Выбрать файл с текстом" Click="MI_ChooseFileTextCipf3_Click"/>
@@ -210,10 +201,32 @@
                         </ContextMenu>
                     </TextBox.ContextMenu>
                 </TextBox>
+                <DataGrid x:Name="GridCipf3"
+                    Grid.Column="2"
+                    Grid.Row="3" 
+                    AutoGenerateColumns="False" 
+                    IsReadOnly="False" 
+                    ItemsSource="{Binding}" VerticalScrollBarVisibility="Visible" Margin="0,-1,0,0">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Ранг (RD)" 
+                                Binding="{Binding RealDistribution}" 
+                                Width="60"/>
+                        <DataGridTextColumn Header="Слова" 
+                                Binding="{Binding Words}" 
+                                Width="100*"/>
+                        <DataGridTextColumn Header="(ZD)" 
+                                Binding="{Binding ZipfDistribution}" 
+                                Width="60"/>
+                        <DataGridTextColumn Header="(DevZ)" 
+                                Binding="{Binding DevZ}" 
+                                Width="60"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                
                 <Button x:Name="buttonCipf"                       
                     Content="Распределение по Ципфу"
                     Grid.Column="0" 
-                    Grid.Row="3"
+                    Grid.Row="4"
                     Click="buttonCipf_Click" Margin="30,5,30,5"/>
             </Grid>
         </StackPanel>

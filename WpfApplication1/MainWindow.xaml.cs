@@ -4,9 +4,11 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -15,6 +17,14 @@ namespace WpfApplication1
     public partial class MainWindow
     {
         public string thePathToTheFile = "";
+        public string textR = "", text2 = "", text3 = "";
+        public bool CB1Check = false;
+
+        public class test
+        {
+            public string Words { get; set; }
+        }
+
         public class Ranking
         {
             public string Words { get; set; }
@@ -59,6 +69,7 @@ namespace WpfApplication1
         private string WriteFile()
         {
             string textFromFile = textBox1.Text;
+            //textFromFile.t
             int index;
             //textFromFile = Regex.Replace(textFromFile.ToLower(), @"(?!="")""(?!"")", "");
             //textFromFile.ToCharArray().Where(n => !char.IsDigit(n)).ToArray();
@@ -71,9 +82,11 @@ namespace WpfApplication1
             {
                 case 1:
                     MyRegex = new Regex(@"[^a-z]", RegexOptions.IgnoreCase);
+                    textFromFile = Regex.Replace(@textFromFile, "[ ]+", " ");
                     return MyRegex.Replace(@textFromFile.ToLower(), @" ");
                 case 2:
                     MyRegex = new Regex(@"[^а-я]", RegexOptions.IgnoreCase);
+                    textFromFile = Regex.Replace(textFromFile, "[ ]+", " ");
                     return MyRegex.Replace(@textFromFile.ToLower(), @" ");
 
             }
@@ -102,7 +115,7 @@ namespace WpfApplication1
                     //Console.WriteLine($"Текст из файла: {textFromFile}");
                     text = textFromFile.ToLower();
                 }*/
-                string[] arr = text.Split();
+                string[] arr = text.Split(' ');
                 string result = "";
                 foreach (var val in arr)
                 {
@@ -171,14 +184,72 @@ namespace WpfApplication1
         }
 
         private void RankingWithCipfFunction()
-        {        
-            if (textBoxCipf1.Text != "" && MD5(textBoxCipf1.Text) != hashOutput)
+        {
+            double DeVZ1 = 0, DeVZ2 = 0, DeVZ3 = 0, DistanceRTo2 = 0, DistanceRTo3;
+            var th1 = new Thread(RankingTextR);
+            var th2 = new Thread(RankingText2);
+            var th3 = new Thread(RankingText3);
+            List<Thread> ThreadList1 = new List<Thread>
             {
-                hashOutput = MD5(textBoxCipf1.Text);
-                List<RankingWithCipf> rankingWithCipf = new List<RankingWithCipf>();
-                List<Ranking> rankings = new List<Ranking>();
-                string textCipf1 = RankingCipf(textBoxCipf1);
-                string[] arr = textCipf1.Split();
+                th1,
+                th2,
+                th3
+            };
+            th1.Start();
+            //th1.Join();
+            th2.Start();
+            //th2.Join();
+            th3.Start();
+            //th3.Join();
+
+            Wait(ThreadList1);
+            //Console.WriteLine("Все ок");
+
+            void RankingTextR()
+            {
+                if (textR != "" && MD5(textR) != hashOutput)
+                {
+                    Console.WriteLine("Поток 1 начало");
+                    hashOutput = MD5(textR);
+                    List<RankingWithCipf> rankingWithCipf = new List<RankingWithCipf>();
+                    List<Ranking> rankings = new List<Ranking>();
+                    string textCipf1 = RankingCipf(textR, CB1Check);
+                    textCipf1 = Regex.Replace(@textCipf1, @"\s+", " ");textCipf1.Trim();
+
+                    string[] arr = textCipf1.Split(' ');
+                    List<string> ls = new List<string>(arr);
+                    /*ls.Sort();
+                    foreach (string val in ls.Distinct())
+                    {
+                        rankings.Add(new Ranking { Count = ls.Where(x => x == val).Count(), Words = val });
+                        Console.WriteLine(val + " - " + ls.Where(x => x == val).Count() + " раз");
+                    }*/
+
+                 /*
+                while (true)//(var LS in ls)
+                {
+                    if (ls.FindAll((x) => x == ls.ElementAt(0)).Count != 0)
+                    {
+                        //int indexFirst = ls.FindIndex((x)=>x==ls.ElementAt(0)); int indexLast = ls.FindLastIndex((x)=>x== ls.ElementAt(0));
+
+                        foreach (var LS in buf)
+                        {
+                            //Console.WriteLine(LS);
+                        }
+                        rankings.Add(new Ranking { Count = buf.Count(), Words = ls.ElementAt(0) });
+                        j++;
+                        ls.RemoveAll((x) => x == ls.ElementAt(0));
+
+                        //Console.WriteLine(LS);
+                    }
+                    else
+                        break;
+                }*/
+                /*foreach (var LS in rankings)
+                {
+                    Console.WriteLine(LS);
+                }*/
+
                 string result = "";
                 int number = 0;
                 foreach (var val in arr)
@@ -198,82 +269,160 @@ namespace WpfApplication1
                 }
                 int j = 1;
                 var SortRankings = rankings.OrderByDescending(u => u.Count);
+                //var SortRankings = rankings.OrderBy(u => u.Words);
                 foreach (var n in SortRankings)
                 {
                     rankingWithCipf.Add(new RankingWithCipf { RealDistribution = n.Count, Words = n.Words, ZipfDistribution = n.Count / j, DevZ = Math.Abs(n.Count - (n.Count / j)) });
+                    DeVZ1 += Math.Abs(n.Count - (n.Count / j));
                     j++;
                 }
-                GridCipf1.ItemsSource = rankingWithCipf;
-            }
-            if (textBoxCipf2.Text != "" && MD5(textBoxCipf2.Text) != hashOutput2)
-            {
-                hashOutput2 = MD5(textBoxCipf2.Text);
-                List<RankingWithCipf> rankingWithCipf2 = new List<RankingWithCipf>();
-                List<Ranking> rankings2 = new List<Ranking>();
-                string textCipf2 = RankingCipf(textBoxCipf2);
-                string[] arr = textCipf2.Split();
-                string result = "";
-                foreach (var val in arr)
-                {
-                    if (!result.Contains(val))
-                    {
-                        int count = 0;
-                        for (var i = 0; i < arr.Length; i++)
-                        {
-                            if (arr[i] == val)
-                                count++;
-                        }
-                        rankings2.Add(new Ranking { Count = count, Words = val });
-                        result += val + "_" + count + " ";
-                    }
-                }
-                int j = 1;
-                var SortRankings = rankings2.OrderByDescending(u => u.Count);
-                foreach (var n in SortRankings)
-                {
-                    rankingWithCipf2.Add(new RankingWithCipf { RealDistribution = n.Count, Words = n.Words, ZipfDistribution = n.Count / j, DevZ = Math.Abs(n.Count - (n.Count / j)) });
-                    j++;
-                }
-                GridCipf2.ItemsSource = rankingWithCipf2;
-            }
-            if (textBoxCipf3.Text != "" && MD5(textBoxCipf3.Text) != hashOutput3)
-            {
-                hashOutput3 = MD5(textBoxCipf3.Text);
-                List<RankingWithCipf> rankingWithCipf3 = new List<RankingWithCipf>();
-                List<Ranking> rankings3 = new List<Ranking>();
-                string textCipf3 = RankingCipf(textBoxCipf3);
-                string[] arr = textCipf3.Split();
-                string result = "";
+                //Console.WriteLine("Сумма отклонений: " + DeVZ1.ToString());
+                DeVZ1 /= j;
+                //Console.WriteLine("Колличество уникальных слов в тексте: " + j);
+                //Console.WriteLine("Нормализация: " + DeVZ1.ToString());
+                //GridCipf1.ItemsSource = rankingWithCipf;
 
-                foreach (var val in arr)
+                Dispatcher.BeginInvoke(new ThreadStart(delegate { GridCipf1.ItemsSource = rankingWithCipf;}));
+                Console.WriteLine("Поток 1 выполнился");
+            }
+                else
+                    Console.WriteLine("Пустая строка №1");
+            }
+            void RankingText2()
+            {
+                
+                if (text2 != "" && MD5(text2) != hashOutput2)
                 {
-                    if (!result.Contains(val))
+                    Console.WriteLine("Поток 2 Начало");
+                    hashOutput2 = MD5(text2);
+                    List<RankingWithCipf> rankingWithCipf2 = new List<RankingWithCipf>();
+                    List<Ranking> rankings2 = new List<Ranking>();
+                    string textCipf2 = RankingCipf(text2, CB1Check);
+                    textCipf2 = Regex.Replace(@textCipf2, @"\s+", " "); textCipf2.Trim();
+                    string[] arr = textCipf2.Split();
+                    string result = "";
+                    foreach (var val in arr)
                     {
-                        int count = 0;
-                        for (var i = 0; i < arr.Length; i++)
+                        if (!result.Contains(val))
                         {
-                            if (arr[i] == val)
-                                count++;
+                            int count = 0;
+                            for (var i = 0; i < arr.Length; i++)
+                            {
+                                if (arr[i] == val)
+                                    count++;
+                            }
+                            rankings2.Add(new Ranking { Count = count, Words = val });
+                            result += val + "_" + count + " ";
                         }
-                        //rankingWithCipf3.Add(new RankingWithCipf { RealDistribution = count, Words = val });//, ZipfDistribution = count / j, DevZ = Math.Abs(count - (count / j))
-                        rankings3.Add(new Ranking { Count = count, Words = val });
-
-                        result += val + "_" + count + " ";
                     }
+                    int j = 1;
+                    var SortRankings = rankings2.OrderByDescending(u => u.Count);
+                    foreach (var n in SortRankings)
+                    {
+                        rankingWithCipf2.Add(new RankingWithCipf { RealDistribution = n.Count, Words = n.Words, ZipfDistribution = n.Count / j, DevZ = Math.Abs(n.Count - (n.Count / j)) });
+                        DeVZ2 += Math.Abs(n.Count - (n.Count / j));
+                        j++;
+                    }
+                    DeVZ2 /= j;
+                    //GridCipf2.ItemsSource = rankingWithCipf2;
+                    Dispatcher.BeginInvoke(new ThreadStart(delegate { GridCipf2.ItemsSource = rankingWithCipf2; }));
+                    Console.WriteLine("Поток 2 выполнился");
                 }
-                int j = 1;
-                var SortRankings = rankings3.OrderByDescending(u => u.Count);
-                foreach (var n in SortRankings)
+                else
+                    Console.WriteLine("Пустая строка №2");
+            }
+
+            void RankingText3()
+            {
+                
+                if (text3 != "" && MD5(text3) != hashOutput3)
                 {
-                    rankingWithCipf3.Add(new RankingWithCipf { RealDistribution = n.Count, Words = n.Words, ZipfDistribution = n.Count / j, DevZ = Math.Abs(n.Count - (n.Count / j)) });
-                    j++;
+                    Console.WriteLine("Поток 3 начало");
+                    hashOutput3 = MD5(text3);
+                    List<RankingWithCipf> rankingWithCipf3 = new List<RankingWithCipf>();
+                    List<Ranking> rankings3 = new List<Ranking>();
+                    string textCipf3 = RankingCipf(text3, CB1Check);
+                    textCipf3 = Regex.Replace(@textCipf3, @"\s+", " "); textCipf3.Trim();
+                    string[] arr = textCipf3.Split();
+                    string result = "";
+
+                    foreach (var val in arr)
+                    {
+                        if (!result.Contains(val))
+                        {
+                            int count = 0;
+                            for (var i = 0; i < arr.Length; i++)
+                            {
+                                if (arr[i] == val)
+                                    count++;
+                            }
+                            //rankingWithCipf3.Add(new RankingWithCipf { RealDistribution = count, Words = val });//, ZipfDistribution = count / j, DevZ = Math.Abs(count - (count / j))
+                            rankings3.Add(new Ranking { Count = count, Words = val });
+
+                            result += val + "_" + count + " ";
+                        }
+                    }
+                    int j = 1;
+                    var SortRankings = rankings3.OrderByDescending(u => u.Count);
+                    foreach (var n in SortRankings)
+                    {
+                        rankingWithCipf3.Add(new RankingWithCipf { RealDistribution = n.Count, Words = n.Words, ZipfDistribution = n.Count / j, DevZ = Math.Abs(n.Count - (n.Count / j)) });
+                        DeVZ3 += Math.Abs(n.Count - (n.Count / j));
+                        j++;
+                    }
+                    DeVZ3 /= j;
+                    Console.WriteLine("Поток 3 Конец");
+                    Dispatcher.BeginInvoke(new ThreadStart(delegate { GridCipf3.ItemsSource = rankingWithCipf3; }));
+                    //GridCipf3.ItemsSource = rankingWithCipf3;
                 }
-                GridCipf3.ItemsSource = rankingWithCipf3;
+                else
+                    Console.WriteLine("Пустая строка №3");
+            }
+
+            void Wait(List<Thread> ThreadList)
+            {
+                while (true)
+                {
+                    int WorkCount = 0;
+
+                    for (int i = 0; i < ThreadList.Count; i++)
+                    {
+                        WorkCount += (ThreadList[i].IsAlive) ? 0 : 1;
+                    }
+
+                    if (WorkCount == ThreadList.Count)
+                        break;
+                }
+            }
+            if (DeVZ1 != 0 && DeVZ2 != 0 && DeVZ3 != 0)
+            {
+                DistanceRTo2 = DeVZ2 - DeVZ1;
+                DistanceRTo3 = DeVZ3 - DeVZ1;
+                double input;
+                if (DistanceRTo2 < DistanceRTo3)
+                {
+                    input = (DistanceRTo3 - DistanceRTo2) / (Math.Abs(DistanceRTo2)) * 100;
+                    //Console.WriteLine("Дистанция между R и 2: " + DistanceRTo2.ToString() + "\n Дистаниция между R и 3: " + DistanceRTo3.ToString());
+                    MessageBox.Show("Расстояние между 3 и R текстами  на " + input.ToString() + "% меньше чем расстояние между 2 и R текстами.\n Вывод: скорее всего 3 текст был написан автором эталонного текста");
+                }
+                else
+                {
+                    input = (DistanceRTo2 - DistanceRTo3) / (Math.Abs(DistanceRTo3)) * 100;
+                    //Console.WriteLine("Дистанция между R и 2: " + DistanceRTo2.ToString() + "\n Дистаниция между R и 3: " + DistanceRTo3.ToString());
+                    MessageBox.Show("Расстояние между 2 и R текстами  на " + input.ToString() + "% меньше чем расстояние между 3 и R текстами.\n Вывод: скорее всего 2" +
+                        " текст был написан автором эталонного текста");
+                }                 
             }
         }
 
         private void buttonCipf_Click(object sender, RoutedEventArgs e)
         {
+            textR = textBoxCipf1.Text;
+            text2 = textBoxCipf2.Text;
+            text3 = textBoxCipf3.Text;
+            CB1Check = RB1.IsChecked.Value;
+            /*var thread = new Thread(RankingWithCipfFunction);
+            thread.Start();*/
             RankingWithCipfFunction();
         }
 
@@ -299,6 +448,30 @@ namespace WpfApplication1
 
             }return "";
            //textFromFile.Where(c => !char.IsPunctuation(c)).Aggregate("", (current, c) => current + c);
+        }
+        private string RankingCipf(string tb, bool RB1Checked)
+        {
+            string textFromFile = tb;
+            int index;
+            Regex MyRegex;
+            //textFromFile = Regex.Replace(textFromFile.ToLower(), @"(?!="")""(?!"")", "");
+            //textFromFile.ToCharArray().Where(n => !char.IsDigit(n)).ToArray();
+            if (RB1Checked == true)
+                index = 1;
+            else
+                index = 2;
+            switch (index)
+            {
+                case 1:
+                    MyRegex = new Regex(@"[^a-z]", RegexOptions.IgnoreCase);
+                    return MyRegex.Replace(@textFromFile.ToLower(), @" ");
+                case 2:
+                    MyRegex = new Regex(@"[^а-я]", RegexOptions.IgnoreCase);
+                    return MyRegex.Replace(@textFromFile.ToLower(), @" ");
+
+            }
+            return "";
+            //textFromFile.Where(c => !char.IsPunctuation(c)).Aggregate("", (current, c) => current + c);
         }
 
         private void MI_ChooseFileTextCipf1_Click(object sender, RoutedEventArgs e)
@@ -338,10 +511,12 @@ namespace WpfApplication1
 
         private void MI_ChooseFileTextCipf2_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.FileName = "Document"; // Default file name
-            dlg.DefaultExt = ".txt"; // Default file extension
-            dlg.Filter = "Text documents (.txt)|*.txt"; // Filter files by extension
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                FileName = "Document", // Default file name
+                DefaultExt = ".txt", // Default file extension
+                Filter = "Text documents (.txt)|*.txt" // Filter files by extension
+            };
 
             // Show open file dialog box
             Nullable<bool> result = dlg.ShowDialog();
@@ -381,10 +556,12 @@ namespace WpfApplication1
 
         private void MI_ChooseFileTextCipf3_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.FileName = "Document"; // Default file name
-            dlg.DefaultExt = ".txt"; // Default file extension
-            dlg.Filter = "Text documents (.txt)|*.txt"; // Filter files by extension
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                FileName = "Document", // Default file name
+                DefaultExt = ".txt", // Default file extension
+                Filter = "Text documents (.txt)|*.txt" // Filter files by extension
+            };
 
             // Show open file dialog box
             Nullable<bool> result = dlg.ShowDialog();
